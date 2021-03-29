@@ -4,7 +4,6 @@
 import clsx from 'clsx'
 
 // Material UI
-import { makeStyles } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Drawer from '@material-ui/core/Drawer'
 import AppBar from '@material-ui/core/AppBar'
@@ -31,6 +30,7 @@ import AddIcon from '@material-ui/icons/Add'
 import GroupIcon from '@material-ui/icons/Group'
 import AssignmentIcon from '@material-ui/icons/Assignment'
 import ReceiptIcon from '@material-ui/icons/Receipt'
+import SettingsIcon from '@material-ui/icons/Settings'
 
 
 import TableData from '../TableData/TableData'
@@ -40,7 +40,7 @@ import New from '../New/New'
 
 
 import React, { Component } from 'react'
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles'
 
 
 
@@ -124,9 +124,9 @@ const styles = (theme) => ({
   fixedHeight: {
     height: 240,
   },
-});
+})
 
-
+const autoBind = require('auto-bind')
 class App extends Component {
   constructor( props ) {
     super( props )
@@ -135,32 +135,45 @@ class App extends Component {
       anchorEl: null,
       openMenu: false,
       sectionToShow: ['table', 'projects'],
+      update: true
     }
+    autoBind( this )
   }
 
-  render = () => {
-    const { classes } = this.props
-    const handleDrawerOpen = () => {
+  
+    handleDrawerOpen = () => {
       this.setState({ openDrawer: true })
     }
-    const handleDrawerClose = () => {
+    handleDrawerClose = () => {
       this.setState({ openDrawer: false })
     }
-    const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight)
+    //const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight)
   
-    const handleMenuOpen = (event) => {
+    handleMenuOpen = (event) => {
       this.setState({ anchorEl: event.currentTarget, openMenu: true })
     }
   
-    const handleMenuClose = () => {
+    handleMenuClose = () => {
       this.setState({ anchorEl: null, openMenu: false })
     }
   
-    const changeToSection = (section) => {
-      console.log(section)
-      this.setState({ sectionToShow: section })
+    changeToSection = (section) => {
+      this.setState({ sectionToShow: section, update: true })
     }
 
+    renderSection = () => {
+      console.log('renderSection', this.state.sectionToShow)
+      var rst = ''
+      if(this.state.sectionToShow[0] === 'table') {
+        rst = <TableData section={ this.state.sectionToShow[1] } />
+      } else if(this.state.sectionToShow[0] === 'new') {
+        rst = <New section={ this.state.sectionToShow[1]  } />
+      }
+      return rst
+    }
+
+  render = () => {
+    const { classes } = this.props
     return (
       <div className={classes.root}>
         <CssBaseline />
@@ -170,16 +183,16 @@ class App extends Component {
               edge="start"
               color="inherit"
               aria-label="open drawer"
-              onClick={ handleDrawerOpen }
+              onClick={ this.handleDrawerOpen }
               className={ (classes.menuButton, this.state.openDrawer && classes.menuButtonHidden) }
             >
               <MenuIcon />
             </IconButton>
             <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-              WhiteSpace Data Governance
+              Data Governance
             </Typography>
             <div>
-              <IconButton color="inherit" onClick={ handleMenuOpen }>
+              <IconButton color="inherit" onClick={ this.handleMenuOpen }>
                 <AddIcon />
               </IconButton>
               <Menu
@@ -195,10 +208,11 @@ class App extends Component {
                     horizontal: 'right',
                   }}
                   open={ this.state.openMenu }
-                  onClose={ handleMenuClose }
+                  onClose={ this.handleMenuClose }
                 >
-                  <MenuItem onClick={ handleMenuClose }>Project</MenuItem>
-                  <MenuItem onClick={ handleMenuClose }>Issue</MenuItem>
+                  <MenuItem onClick = { () => { this.changeToSection(['new', 'project']); this.handleMenuClose() } }><AccountTreeIcon />{ " " }Project</MenuItem>
+                  <MenuItem onClick = { () => { this.changeToSection(['new', 'configuration']); this.handleMenuClose() } }><SettingsIcon />{ " " }Configurations</MenuItem>
+                  <MenuItem onClick = { () => { this.changeToSection(['new', 'issue']); this.handleMenuClose() } }><ReceiptIcon />{ " " }Issue</MenuItem>
                 </Menu>
                 </div>
           </Toolbar>
@@ -211,25 +225,31 @@ class App extends Component {
           openDrawer={ this.state.openDrawer }
         >
         <div className={classes.toolbarIcon}>
-          <IconButton onClick={ handleDrawerClose }>
+          <IconButton onClick={ this.handleDrawerClose }>
             <ChevronLeftIcon />
             </IconButton>
         </div>
         <Divider />
           <List>
-            <ListItem button onClick = { () => { changeToSection(['table', 'projects']) }  }>
+            <ListItem button onClick = { () => { this.changeToSection(['table', 'projects']) } }>
               <ListItemIcon>
                 <AccountTreeIcon />
               </ListItemIcon>
               <ListItemText primary="Projects" />
             </ListItem>
-            <ListItem button onClick = { () => { changeToSection(['table', 'issues']) }  }>
+            <ListItem button onClick = { () => { this.changeToSection(['table', 'configurations']) } }>
+              <ListItemIcon>
+                <SettingsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Configurations" />
+            </ListItem>
+            <ListItem button onClick = { () => { this.changeToSection(['table', 'issues']) } }>
               <ListItemIcon>
                 <ReceiptIcon />
               </ListItemIcon>
               <ListItemText primary="Issues" />
             </ListItem>
-            <ListItem button onClick = { () => { changeToSection(['table', 'samples']) }  }>
+            <ListItem button onClick = { () => { this.changeToSection(['table', 'samples']) } }>
               <ListItemIcon>
                 <GroupIcon />
               </ListItemIcon>
@@ -238,13 +258,13 @@ class App extends Component {
           </List>
         <Divider />
           <List>
-          <ListItem button onClick = { () => { changeToSection(['report', 'project']) }  }>
+          <ListItem button onClick = { () => { this.changeToSection(['report', 'project']) } }>
               <ListItemIcon>
                 <AssignmentIcon />
               </ListItemIcon>
               <ListItemText primary="Project" />
             </ListItem>
-            <ListItem button onClick = { () => { changeToSection(['report', 'issue']) }  }>
+            <ListItem button onClick = { () => { this.changeToSection(['report', 'issue']) } }>
               <ListItemIcon>
                 <AssignmentIcon />
               </ListItemIcon>
@@ -259,7 +279,7 @@ class App extends Component {
           <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Paper className={classes.paper}>
-                  
+                  { this.renderSection() }
                 </Paper>
               </Grid>
             </Grid>
